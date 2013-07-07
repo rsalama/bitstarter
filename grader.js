@@ -78,26 +78,26 @@ if(require.main == module) {
         .option('-u, --url <URL>', 'Qualified URL')
         .parse(process.argv);
     if (program.file) {
-	fs.readFile(program.file, function(err, data) {
-	    if (err) {
-		console.error('Error: ' + err);
-	    } else {
-		doCheck(data, program.checks);
-	    }
-	});
+        fs.readFile(program.file, function(err, data) {
+            if (err) {
+                console.error('Error: ' + err);
+            } else {
+                doCheck(data, program.checks);
+            }
+        });
     }
     else if (program.url) {
-	rest.get(program.url).on('complete', function(result) {
+        rest.get(program.url).on('complete', function(result) {
             if (result instanceof Error) {
-		console.error('Error: ' + result.message);
+                console.error('Error: ' + result.message);
             } else {
-		doCheck(result, program.checks);
+                doCheck(result, program.checks);
             }
         });
     }
     else {
-	console.error("Must specify either --file or --url!");
-	program.help();
+        console.error("Must specify either --file or --url!");
+        program.help();
     }
 
 } else {
