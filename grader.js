@@ -43,18 +43,9 @@ var assertFileExists = function(infile) {
     return instr;
 };
 
-var cheerioHtmlFile = function(htmlfile) {
-    return cheerio.load(fs.readFileSync(htmlfile));
-};
-
 var loadChecks = function(checksfile) {
     assertFileExists(checksfile);
     return JSON.parse(fs.readFileSync(checksfile));
-};
-
-var checkHtmlFile = function(htmlfile, checksfile) {
-    assertFileExists(htmlfile);
-    return checkHtml(fs.readFileSync(htmlfile), checksfile);
 };
 
 var checkHtml = function(html, checksfile) {
@@ -67,6 +58,12 @@ var checkHtml = function(html, checksfile) {
     }
     return out;
 };
+
+var doCheck = function(data, checksfile) {
+    var checkJson = checkHtml(data, program.checks);
+    var outJson = JSON.stringify(checkJson, null, 2);
+    console.log(outJson);
+}
 
 var clone = function(fn) {
     // Workaround for commander.js issue.
@@ -81,18 +78,20 @@ if(require.main == module) {
         .option('-u, --url <URL>', 'Qualified URL')
         .parse(process.argv);
     if (program.file) {
-        var checkJson = checkHtmlFile(program.file, program.checks);
-        var outJson = JSON.stringify(checkJson, null, 2);
-        console.log(outJson);
+	fs.readFile(program.file, function(err, data) {
+	    if (err) {
+		console.error('Error: ' + err);
+	    } else {
+		doCheck(data, program.checks);
+	    }
+	});
     }
     else if (program.url) {
 	rest.get(program.url).on('complete', function(result) {
             if (result instanceof Error) {
 		console.error('Error: ' + result.message);
             } else {
-		var checkJson = checkHtml(result, program.checks);
-		var outJson = JSON.stringify(checkJson, null, 2);
-		console.log(outJson);
+		doCheck(result, program.checks);
             }
         });
     }
